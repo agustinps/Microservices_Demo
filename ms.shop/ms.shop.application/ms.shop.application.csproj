@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="MediatR" Version="10.0.1" />
+    <PackageReference Include="Refit" Version="6.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>    
+    <ProjectReference Include="..\..\ms.communications\ms.rabbitmq\ms.rabbitmq.csproj" />
+    <ProjectReference Include="..\ms.shop.domain\ms.shop.domain.csproj" />
+    <ProjectReference Include="..\ms.shop.infrastructure\ms.shop.infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
