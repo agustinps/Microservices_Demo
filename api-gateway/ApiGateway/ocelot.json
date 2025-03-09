@@ -1,0 +1,189 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/login",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/login",
+      "DownstreamScheme": "https",
+      //Esta propiedad sobra en producción, aquí se utiliza por no tener certificado válido
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8004
+        }
+      ],
+      "CacheOptions": {
+        "Enable": false // Desactiva el caché para esta ruta
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/product/{id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/product/{id}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8003
+        }
+      ]
+    },
+    {
+      "UpstreamPathTemplate": "/product/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Put" ],
+      "DownstreamPathTemplate": "/product/{everything}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8003
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "user_role": "Administrator"
+      },
+      "CacheOptions": {
+        "Enable": false // Desactiva el caché para esta ruta
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/basket/{customerId}",
+      "UpstreamHttpMethod": [ "Get"],
+      "DownstreamPathTemplate": "/basket/{customerId}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8001
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "user_role": "Administrator"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/basket/{customerId}",
+      "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/basket/{customerId}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8001
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "user_role": "Administrator"
+      },
+      "CacheOptions": {
+        "Enable": false // Desactiva el caché para esta ruta
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/basket/{customerId}/{productId}",
+      "UpstreamHttpMethod": [ "Delete" ],
+      "DownstreamPathTemplate": "/basket/{customerId}/{productId}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8001
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "user_role": "Administrator"
+      },
+      "CacheOptions": {
+        "Enable": false // Desactiva el caché para esta ruta
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/order/{customerId}",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamPathTemplate": "/order/{customerId}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8002
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "user_role": "Administrator"
+      },
+      "CacheOptions": {
+        "Enable": false // Desactiva el caché para esta ruta
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/order/{customerId}/{orderId}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/order/{customerId}/{orderId}",
+      "DownstreamScheme": "https",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "DownstreamHostAndPorts": [
+        {
+          //"Host": "host.docker.internal",
+          "Host": "localhost",
+          "Port": 8002
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "user_role": "Administrator"
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://localhost:7005",
+    "RateLimitOptions": {
+      "EnableRateLimiting": true,
+      "Period": "10s",
+      "PeriodTimes": 2,
+      "ClientWhitelist": [ "127.0.0.1" ]
+    },
+    "CacheOptions": {
+      "Enable": true,
+      "TtlSeconds": 30,
+      "UseResponseCache": true,
+      "MaxRecords": 1000,
+      "UseDictionaryHandle": true
+    },
+    "QoSOptions": {  //Circuito Breaker
+      "ExceptionsAllowedBeforeBreaking": 3, 
+      "TimeoutValue": 5000, 
+      "DurationOfBreak": 10000 
+    }
+  }
+}

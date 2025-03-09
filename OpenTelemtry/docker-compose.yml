@@ -1,0 +1,79 @@
+services:
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.109.0
+    volumes:
+      - ./otel-collector/otel-config.yaml:/etc/otel/config.yaml
+      - ./log:/log/otel
+    command: --config /etc/otel/config.yaml
+    environment:
+      LOKI_ENDPOINT: "http://loki:3100/loki/api/v1/push"
+      JAEGER_ENDPOINT: "jaeger:4317"
+      ZIPKIN_ENDPOINT: "http://zipkin:9411/api/v2/spans"
+      PROMETHEUS_ENDPOINT: "0.0.0.0:8889"
+      ASPECTO_ENDPOINT: "otelcol.aspecto.io:4317"
+      ASPECTO_APIKEY: "c1de0e60-7b48-494b-a0e3-e3500db40640"      
+      AZ_INSTRUMENTATION_KEY: "8e062472-20ce-4157-b6fb-f9d8266733c1"
+      DATADOG_KEY: "dba755bad76b17f9e6cde18af7c2617e"
+      DATADOG_SITE: "us5.datadoghq.com"
+    ports:
+      - "8889:8889"   # Prometheus metrics exporter (scrape endpoint)
+      - "13133:13133" # health_check extension
+      - "55679:55679" # ZPages extension
+      - "4318:4318"   # OTLP Receiver protocol HTTP
+      - "4317:4317"   # OTLP Receiver protocol gRPC
+    depends_on:
+      - jaeger
+      - prometheus
+      - loki
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16687:16686" # Jaeger Web UI
+      - "5777:5775"   # accept zipkin.thrift over compact thrift protocol
+      - "6834:6831"   # accept jaeger.thrift over compact thrift protocol
+      - "6835:6832"   # accept jaeger.thrift over binary thrift protocol
+      - "5779:5778"   # serve configs
+      - "14269:14268" # accept jaeger.thrift directly from clients
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3101:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+  
+  promtail:
+    image:  grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./promtail/promtail.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+    ports:
+      - "3001:3000"
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9412:9411"
